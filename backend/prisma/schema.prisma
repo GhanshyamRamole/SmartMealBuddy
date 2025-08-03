@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  password          String
+  name              String
+  dietaryPreferences String[] // ["vegetarian", "vegan", "keto", "gluten-free"]
+  allergies         String[]
+  goals             String?  // "weight-loss", "muscle-gain", "maintenance"
+  dailyCalories     Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  mealPlans    MealPlan[]
+  groceryLists GroceryList[]
+  pantryItems  PantryItem[]
+
+  @@map("users")
+}
+
+model Recipe {
+  id           String   @id @default(cuid())
+  externalId   String?  @unique // Spoonacular recipe ID
+  title        String
+  image        String?
+  readyInMinutes Int?
+  servings     Int?
+  cuisines     String[]
+  dishTypes    String[]
+  diets        String[]
+  ingredients  Json     // Array of ingredient objects
+  instructions Json     // Array of instruction steps
+  nutrition    Json?    // Nutrition information
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  mealPlanRecipes MealPlanRecipe[]
+
+  @@map("recipes")
+}
+
+model MealPlan {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipes MealPlanRecipe[]
+
+  @@map("meal_plans")
+}
+
+model MealPlanRecipe {
+  id         String @id @default(cuid())
+  mealPlanId String
+  recipeId   String
+  day        Int    // 1-7 for days of the week
+  mealType   String // "breakfast", "lunch", "dinner"
+  servings   Int    @default(1)
+
+  mealPlan MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  recipe   Recipe   @relation(fields: [recipeId], references: [id])
+
+  @@map("meal_plan_recipes")
+}
+
+model GroceryList {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  items     Json     // Array of grocery items with quantities
+  status    String   @default("active") // "active", "completed"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("grocery_lists")
+}
+
+model PantryItem {
+  id         String    @id @default(cuid())
+  userId     String
+  name       String
+  quantity   Float
+  unit       String
+  category   String?   // "vegetables", "dairy", "grains", "protein"
+  expiryDate DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("pantry_items")
+}
