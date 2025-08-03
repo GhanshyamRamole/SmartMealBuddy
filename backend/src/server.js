@@ -59,6 +59,8 @@ app.use('/api/recipes', recipeRoutes);
 app.use('/api/mealplans', mealPlanRoutes);
 app.use('/api/grocery-lists', groceryListRoutes);
 app.use('/api/pantry', pantryRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/ai', aiRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -92,7 +94,40 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 SmartMealBuddy API server running on port ${PORT}`);
+// Start server
+const HOST = process.env.HOST || '0.0.0.0';
+const server = app.listen(PORT, HOST, () => {
+  console.log(`🚀 SmartMealBuddy API server running on ${HOST}:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
+  console.log(`🌍 Public access: http://13.201.120.170:${PORT}/health`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  
+  // Initialize scheduled tasks
+  if (process.env.ENABLE_SCHEDULED_TASKS !== 'false') {
+    scheduledTasks.init();
+  } else {
+    console.log('⏸️ Scheduled tasks disabled');
+  }
 });
+
+// Handle server errors
+server.on('error', (error) => {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  switch (error.code) {
+    case 'EACCES':
+      console.error(`Port ${PORT} requires elevated privileges`);
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(`Port ${PORT} is already in use`);
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+});
+
+module.exports = app;

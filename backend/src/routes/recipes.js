@@ -6,6 +6,44 @@ const recipeService = require('../services/recipeService');
 const router = express.Router();
 const prisma = new PrismaClient();
 
+// Get user's recipes (basic endpoint)
+router.get('/', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { limit = 10, offset = 0 } = req.query;
+
+    // Get user's saved/created recipes
+    const recipes = await prisma.recipe.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: parseInt(limit),
+      skip: parseInt(offset)
+    });
+
+    const totalCount = await prisma.recipe.count({
+      where: { userId }
+    });
+
+    res.json({
+      message: 'Recipes retrieved successfully',
+      recipes,
+      pagination: {
+        total: totalCount,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        hasMore: (parseInt(offset) + parseInt(limit)) < totalCount
+      }
+    });
+
+  } catch (error) {
+    console.error('Get recipes error:', error);
+    res.status(500).json({
+      error: 'Failed to retrieve recipes',
+      message: error.message
+    });
+  }
+});
+
 // Search recipes
 router.get('/search', authenticateToken, async (req, res) => {
   try {

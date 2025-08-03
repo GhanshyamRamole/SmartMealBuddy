@@ -7,7 +7,7 @@ const router = express.Router();
 // Get dashboard analytics
 router.get('/dashboard', authenticateToken, async (req, res) => {
   try {
-    const analytics = await analyticsService.getUserDashboardAnalytics(req.user.id);
+    const analytics = await analyticsService.getUserDashboardAnalytics(req.user.userId);
     
     res.json({
       message: 'Dashboard analytics retrieved successfully',
@@ -25,7 +25,7 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
 // Get meal planning analytics
 router.get('/meal-planning', authenticateToken, async (req, res) => {
   try {
-    const analytics = await analyticsService.getMealPlanningAnalytics(req.user.id);
+    const analytics = await analyticsService.getMealPlanningAnalytics(req.user.userId);
     
     res.json({
       message: 'Meal planning analytics retrieved successfully',
@@ -43,7 +43,7 @@ router.get('/meal-planning', authenticateToken, async (req, res) => {
 // Get pantry analytics
 router.get('/pantry', authenticateToken, async (req, res) => {
   try {
-    const analytics = await analyticsService.getPantryAnalytics(req.user.id);
+    const analytics = await analyticsService.getPantryAnalytics(req.user.userId);
     
     res.json({
       message: 'Pantry analytics retrieved successfully',

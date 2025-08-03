@@ -22,6 +22,16 @@ const schemas = {
     name: Joi.string().min(2).max(50).required(),
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required(),
+    confirmPassword: Joi.string().valid(Joi.ref('password')).required()
+      .messages({
+        'any.only': 'Passwords do not match',
+        'any.required': 'Confirm password is required'
+      }),
+    acceptTerms: Joi.boolean().valid(true).required()
+      .messages({
+        'any.only': 'You must accept the terms and conditions',
+        'any.required': 'You must accept the terms and conditions'
+      }),
     dietaryPreferences: Joi.array().items(
       Joi.string().valid('vegetarian', 'vegan', 'keto', 'gluten-free', 'dairy-free', 'nut-free', 'paleo')
     ).default([]),
