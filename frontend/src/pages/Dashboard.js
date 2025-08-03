@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import websocketService from '../services/websocketService';
+import SimpleAISuggestions from '../components/SimpleAISuggestions';
+import WorkingAITest from '../components/WorkingAITest';
 import '../styles/dashboard.css';
 import {
   Calendar,
@@ -21,7 +23,9 @@ import {
   Star,
   Plus,
   ArrowRight,
-  RefreshCw
+  RefreshCw,
+  Brain,
+  Sparkles
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -35,6 +39,8 @@ const Dashboard = () => {
     todayMealPlans: 0,
     weeklyGoalProgress: 0
   });
+  const [showAISuggestions, setShowAISuggestions] = useState(false);
+  const [aiSuggestionType, setAiSuggestionType] = useState(null);
 
   // Real-time data fetching and WebSocket setup
   useEffect(() => {
@@ -156,6 +162,13 @@ const Dashboard = () => {
   };
 
   const quickActions = [
+    {
+      title: 'AI Meal Suggestions',
+      description: 'Get personalized AI recommendations',
+      icon: Brain,
+      color: 'bg-purple-500',
+      action: () => setShowAISuggestions(true)
+    },
     {
       title: 'Create Meal Plan',
       description: 'Plan your week ahead',
@@ -326,6 +339,11 @@ const Dashboard = () => {
                   ))}
                 </div>
               </div>
+            </div>
+
+            {/* AI Test Component */}
+            <div className="mb-6">
+              <WorkingAITest />
             </div>
 
             {/* Recent Activity */}
@@ -511,6 +529,12 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* AI Meal Suggestions Modal */}
+      <SimpleAISuggestions
+        isOpen={showAISuggestions}
+        onClose={() => setShowAISuggestions(false)}
+      />
     </div>
   );
 };
@@ -552,9 +576,18 @@ const MetricCard = ({ title, value, change, icon: Icon, color, trend }) => {
 };
 
 // Component: Quick Action Card
-const QuickActionCard = ({ title, description, icon: Icon, color, href }) => {
+const QuickActionCard = ({ title, description, icon: Icon, color, href, action }) => {
+  const handleClick = () => {
+    if (action) {
+      action();
+    } else if (href) {
+      // In a real app, you'd use React Router
+      window.location.href = href;
+    }
+  };
+
   return (
-    <div className="group cursor-pointer quick-action">
+    <div className="group cursor-pointer quick-action" onClick={handleClick}>
       <div className="card card-hover p-4 transition-all duration-300">
         <div className="flex items-center space-x-3">
           <div className={`w-10 h-10 rounded-lg ${color} flex items-center justify-center icon-bounce`}>

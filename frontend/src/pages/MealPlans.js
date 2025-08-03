@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import MealPlanWizard from '../components/MealPlanWizard';
 import {
   Calendar,
   Plus,
@@ -12,7 +13,10 @@ import {
   Copy,
   Filter,
   Search,
-  Loader
+  Loader,
+  ShoppingCart,
+  Zap,
+  Star
 } from 'lucide-react';
 
 const MealPlans = () => {
@@ -20,6 +24,7 @@ const MealPlans = () => {
   const [mealPlans, setMealPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showSmartWizard, setShowSmartWizard] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
@@ -186,13 +191,22 @@ const MealPlans = () => {
                 Plan your meals for the week and stay organized
               </p>
             </div>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="btn-primary flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Create Plan
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowSmartWizard(true)}
+                className="btn-primary flex items-center gap-2"
+              >
+                <Zap className="h-4 w-4" />
+                Smart Plan + Grocery
+              </button>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="btn-outline flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Quick Plan
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -326,6 +340,14 @@ const MealPlans = () => {
         )}
       </div>
 
+      {/* Smart Wizard Modal */}
+      {showSmartWizard && (
+        <MealPlanWizard
+          onClose={() => setShowSmartWizard(false)}
+          onCreate={createMealPlan}
+        />
+      )}
+
       {/* Create Modal */}
       {showCreateModal && (
         <CreateMealPlanModal
@@ -417,6 +439,24 @@ const MealPlanCard = ({ plan, onDelete, onDuplicate }) => {
           </div>
         </div>
 
+        {/* Enhanced Features */}
+        {plan.groceryList && (
+          <div className="mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <ShoppingCart className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium text-green-800">Auto-Generated Grocery List</span>
+              </div>
+              <span className="text-xs text-green-600">
+                ${plan.groceryList.estimatedTotal?.toFixed(2) || '0.00'}
+              </span>
+            </div>
+            <div className="text-xs text-green-700">
+              {plan.groceryList.totalItems || 0} items • Ready for online purchase
+            </div>
+          </div>
+        )}
+
         {/* Sample Meals */}
         {plan.meals && plan.meals.length > 0 && (
           <div className="mb-4">
@@ -442,6 +482,12 @@ const MealPlanCard = ({ plan, onDelete, onDuplicate }) => {
             <Eye className="h-4 w-4" />
             View Plan
           </button>
+          {plan.groceryList && (
+            <button className="btn-outline text-sm py-2 px-3 flex items-center gap-1">
+              <ShoppingCart className="h-4 w-4" />
+              Shop
+            </button>
+          )}
           <button className="btn-outline text-sm py-2 px-3">
             <Edit className="h-4 w-4" />
           </button>

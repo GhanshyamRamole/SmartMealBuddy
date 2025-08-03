@@ -13,6 +13,7 @@ const groceryListRoutes = require('./routes/groceryLists');
 const pantryRoutes = require('./routes/pantry');
 const analyticsRoutes = require('./routes/analytics');
 const aiRoutes = require('./routes/ai');
+const aiMealSuggestionsRoutes = require('./routes/aiMealSuggestions');
 
 // Import services
 const scheduledTasks = require('./services/scheduledTasks');
@@ -33,7 +34,7 @@ app.use(limiter);
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: ['http://localhost:3000', 'http://13.201.120.170:3000'],
   credentials: true
 }));
 
@@ -61,6 +62,7 @@ app.use('/api/grocery-lists', groceryListRoutes);
 app.use('/api/pantry', pantryRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/ai-meals', aiMealSuggestionsRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
